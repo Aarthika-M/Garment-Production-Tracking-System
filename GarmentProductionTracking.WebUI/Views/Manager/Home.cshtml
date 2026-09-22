@@ -1,0 +1,435 @@
+@model IEnumerable<Application.DTOs.OrderAssignmentDTO>
+
+@{
+    Layout = "_ManagerLayout";
+    ViewData["Title"] = "Home";
+
+    int totalOrders = ViewBag.TotalOrders ?? 0;
+    int completedOrdersCount = ViewBag.CompletedOrders ?? 0;
+    int inProgressOrdersCount = ViewBag.InProgressOrders ?? 0;
+    int pendingOrdersCount = ViewBag.PendingOrders ?? 0;
+    int totalWorkers = ViewBag.TotalWorkers ?? 0;
+    int workersAssigned = ViewBag.WorkersAssigned ?? 0;
+    int workersAvailable = Math.Max(0, totalWorkers - workersAssigned);
+
+    double completionRate = totalOrders > 0 ? (double)completedOrdersCount / totalOrders * 100 : 0;
+    double inProgressRate = totalOrders > 0 ? (double)inProgressOrdersCount / totalOrders * 100 : 0;
+    double pendingRate = totalOrders > 0 ? (double)pendingOrdersCount / totalOrders * 100 : 0;
+
+    // Safe model usage
+    var safeModel = Model ?? new List<Application.DTOs.OrderAssignmentDTO>();
+
+    // Calculate status counts
+    var completedOrders = safeModel.Count(o => o.Status == "Completed");
+    var inProgressOrders = safeModel.Count(o => o.Status == "Processing");
+    var pendingOrders = safeModel.Count(o => o.Status == "Pending");
+
+    // Get upcoming deadlines
+    var upcomingDeadlines = safeModel
+        .Where(o => o.Status != "Completed" && o.DeliveryDate >= DateTime.Now)
+        .OrderBy(o => o.DeliveryDate)
+        .Take(3)
+        .ToList();
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Header -->
+   <div class="row mb-4 align-items-center py-4 px-3 rounded shadow-sm header-section">
+    <div class="col-md-8">
+        <h1 class="h2 fw-bold text-white mb-1">Garment Production Management System</h1>
+        <p class="text-light mb-0">Overview of all orders and workforce progress</p>
+    </div>
+</div>
+
+
+    <!-- KPI Cards -->
+    <div class="row g-3 mb-4">
+
+        <!-- Total Orders -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card metric-card border-0 shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="metric-icon d-flex align-items-center justify-content-center bg-opacity-10 " 
+     style="background-color: #CDC1FF; color: #8C00FF; ">
+    <i class="bi bi-clipboard-data fs-4"></i>
+</div>
+
+                        <span class="badge" style="background-color: #CDC1FF; color: #8C00FF;">All Orders</span>
+
+                    </div>
+                    <h4 class="fw-bold mb-1">@totalOrders</h4>
+                    <p class="text-dark large mb-2"><strong>Total Orders</strong></p>
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar " style="background-color: #CDC1FF; color: #8C00FF;width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completed Orders -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card metric-card border-0 shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="metric-icon bg-success bg-opacity-25">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                        </div>
+                        <span class="badge bg-success bg-opacity-10 text-success">Completed</span>
+                    </div>
+                    <h4 class="fw-bold mb-1">@completedOrdersCount</h4>
+                    <p class="text-dark large mb-2"><strong>Completed Orders</strong></p>
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-success" style="width: @completionRate%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- In Progress Orders -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card metric-card border-0 shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="metric-icon bg-primary bg-opacity-25">
+                            <i class="bi bi-gear-wide-connected text-primary"></i>
+                        </div>
+                        <span class="badge bg-primary bg-opacity-10 text-primary">In Progress</span>
+                    </div>
+                    <h4 class="fw-bold mb-1">@inProgressOrdersCount</h4>
+                    <p class="text-dark large mb-2"><strong>Orders in Progress</strong></p>
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-primary" style="width: @inProgressRate%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Orders -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card metric-card border-0 shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="metric-icon bg-warning bg-opacity-25">
+                            <i class="bi bi-clock-history text-warning"></i>
+                        </div>
+                        <span class="badge bg-warning bg-opacity-10 text-warning">Pending</span>
+                    </div>
+                    <h4 class="fw-bold mb-1">@pendingOrdersCount</h4>
+                    <p class="text-dark large mb-2"><strong>Pending Orders</strong></p>
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-warning" style="width: @pendingRate%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workforce Summary -->
+   <div class="row g-4 mt-3">
+  <div class="col-xl-4 col-md-6">
+    <div class="card shadow-sm border-0 text-center">
+      <div class="card-body">
+        <i class="bi bi-people-fill fs-3 mb-2"></i>
+        <h5 class="fw-bold mb-0">Total Workers</h5>
+        <h3 class="fw-bold text-dark">@totalWorkers</h3>
+        <p class="text-muted large">Total registered workers</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-4 col-md-6">
+    <div class="card shadow-sm border-0 text-center">
+      <div class="card-body">
+        <i class="bi bi-person-workspace fs-3 mb-2"></i>
+        <h5 class="fw-bold mb-0">Assigned Workers</h5>
+         <h3 class="fw-bold text-dark">@ViewBag.WorkersAssigned</h3>
+        <p class="text-muted large">Currently working on orders</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-4 col-md-6">
+    <div class="card shadow-sm border-0 text-center">
+      <div class="card-body">
+        <i class="bi bi-person-check-fill fs-3 mb-2"></i>
+        <h5 class="fw-bold mb-0">Available Workers</h5>
+        <h3 class="fw-bold text-dark">@workersAvailable</h3>
+        <p class="text-muted large">Free and ready for new tasks</p>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Upcoming Deadlines and Chart -->
+    <div class="row g-4 mt-4">
+        <!-- Upcoming Deadlines -->
+        <div class="col-xl-6 col-md-12">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-clock-fill text-warning me-2"></i>Upcoming Orders</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        @if (upcomingDeadlines.Any())
+                        {
+                            foreach (var order in upcomingDeadlines)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-box-seam text-primary me-2"></i>Order @order.OrderId</span>
+                                    <span class="badge bg-warning bg-opacity-75 text-dark">@order.DeliveryDate.ToString("dd MMM yyyy")</span>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="list-group-item text-muted">No upcoming deadlines found</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Status Chart -->
+     <div class="col-xl-6 col-md-12">
+    <div class="card shadow-sm border-0 h-100">
+        <div class="card-header bg-transparent border-0 py-3">
+            <h5 class="fw-bold mb-0"><i class="bi bi-pie-chart-fill text-primary me-2"></i>Order Status Overview</h5>
+        </div>
+        <div class="card-body text-center">
+            <div id="orderStatusChart" style="max-height: 280px;"></div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Chart.js -->
+<script src="~/js/apexcharts.js"></script>
+<script>
+    var options = {
+        series: [{
+            name: 'Orders',
+            data: [@pendingOrdersCount, @inProgressOrdersCount, @completedOrdersCount]
+        }],
+        chart: {
+            type: 'bar',
+            height: 350,
+            toolbar: { show: false }
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 10,
+                horizontal: false,
+                columnWidth: '55%',
+                distributed: true
+            }
+        },
+        dataLabels: {
+            enabled: true,
+            formatter: function (val) { return val + " orders"; },
+            offsetY: -20,
+            style: { fontSize: '13px', colors: ["#333"] }
+        },
+        xaxis: {
+            categories: ['Pending', 'In Progress', 'Completed'],
+            labels: {
+                style: {
+                    colors: ['#f39c12', '#007bff', '#28a745'],
+                    fontWeight: 600
+                }
+            },
+            axisBorder: { show: false },
+            axisTicks: { show: false }
+        },
+        yaxis: {
+        min: 0,
+        max: 10,
+        tickAmount: 10,
+        labels: {
+            style: {
+                colors: '#333',
+                fontSize: '12px',
+                fontWeight: 500
+            }
+        },
+        title: {
+            text: 'Number of Orders',
+            style: {
+                color: '#555',
+                fontSize: '14px',
+                fontWeight: 'bold'
+            }
+        }
+    },
+        colors: ['#f39c12', '#007bff', '#28a745'],
+        grid: { borderColor: '#eee', strokeDashArray: 5 },
+        title: {
+            text: 'Order Status Summary',
+            align: 'center',
+            style: { fontSize: '16px', color: '#333', fontWeight: 'bold' }
+        },
+        tooltip: {
+            theme: 'light',
+            y: { formatter: val => val + " orders" }
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#orderStatusChart"), options);
+    chart.render();
+</script>
+
+<style>
+/*  General Layout */
+body {
+    background: linear-gradient(135deg, #f8faff 0%, #eef1ff 100%);
+    font-family: "Poppins", sans-serif;
+    color: #333;
+    overflow-x: hidden;
+}
+
+/*  Header Section */
+.header-section {
+    background:#B13BFF;
+    border-radius: 14px;
+    box-shadow: 0 8px 25px rgba(177, 59, 255, 0.2);
+    transition: all 0.4s ease;
+}
+.header-section:hover {
+    color:#FA812F;
+
+    
+}
+.header-section h1 {
+    letter-spacing: 0.5px;
+    font-size: 1.9rem;
+}
+.col-md-8 h1:hover {
+    color: #FA812F;/* golden-orange hover */
+    
+}
+
+.col-md-8 p:hover {
+    color:#FA812F; /* light yellow on hover */
+    
+}
+
+
+/*  Metric Cards */
+.metric-card {
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(177, 59, 255, 0.15);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+    transition: all 0.35s ease;
+}
+.metric-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(177, 59, 255, 0.2);
+}
+
+/* ✨ Metric Icons */
+.metric-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.3rem;
+    background: linear-gradient(135deg, #e5d9ff, #ffffff);
+    box-shadow: inset 0 0 10px rgba(177, 59, 255, 0.1);
+    transition: transform 0.3s ease;
+}
+.metric-card:hover .metric-icon {
+    transform: rotate(5deg) scale(1.05);
+}
+
+/*  Progress Bar */
+.progress {
+    background: #ebeef7;
+    border-radius: 30px;
+    overflow: hidden;
+}
+.progress-bar {
+    border-radius: 30px;
+    height: 6px;
+    transition: width 0.4s ease-in-out;
+}
+
+/*  Workforce Cards */
+.card.text-center {
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card.text-center:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(177, 59, 255, 0.25);
+}
+.card.text-center i {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(45deg, #8C00FF, #C77DFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ⏰ Upcoming Deadlines */
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+.list-group-item:hover {
+    background: rgba(177, 59, 255, 0.05);
+    transform: scale(1.01);
+}
+
+/*  Chart Card */
+#orderStatusChart {
+    padding: 10px;
+}
+.card.shadow-sm {
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+.card.shadow-sm:hover {
+    transform: scale(1.02);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);
+}
+
+/*  Animation on Page Load */
+@@keyframes fadeSlideUp {
+    0% { opacity: 0; transform: translateY(25px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+.card {
+    animation: fadeSlideUp 0.8s ease forwards;
+}
+.col-xl-3:nth-child(1) .card { animation-delay: 0.1s; }
+.col-xl-3:nth-child(2) .card { animation-delay: 0.3s; }
+.col-xl-3:nth-child(3) .card { animation-delay: 0.5s; }
+.col-xl-3:nth-child(4) .card { animation-delay: 0.7s; }
+
+/*  Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #8C00FF, #C77DFF);
+    border-radius: 10px;
+}
+
+/* 吝 Responsive Adjustments */
+@@media (max-width: 992px) {
+    .metric-card h4 { font-size: 1.2rem; }
+    .metric-card p { font-size: 0.85rem; }
+    .card.text-center h3 { font-size: 1.3rem; }
+}
+</style>

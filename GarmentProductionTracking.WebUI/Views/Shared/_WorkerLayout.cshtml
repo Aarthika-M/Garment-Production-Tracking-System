@@ -1,0 +1,238 @@
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Worker Panel</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.css" />
+
+    <!-- Bootstrap JS -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --sidebar-width: 280px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f7fb;
+            color: #212529;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #3B0270;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-brand i {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .sidebar-brand:hover {
+            color: #FA812F;
+        }
+
+        .nav {
+            flex: 1;
+            padding: 1rem 0;
+        }
+
+        .nav-link {
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            margin: 0.2rem 0.5rem;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .nav-link i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .nav-link.active, .nav-link:hover {
+            background: #6a0dad;
+            color: #FA812F;
+        }
+
+        .sidebar-footer {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .sidebar-footer .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #0d6efd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-footer div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            min-height: 100vh;
+            transition: var(--transition);
+        }
+
+        /* Sidebar Toggle Button */
+        #sidebarToggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
+            background:#3B0270; 
+            color: white;
+            border: none;
+            border-radius: 12px;
+            width: 30px;
+            height: 30px;
+            font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        #sidebarToggle:hover {
+            background: #B13BFF;
+        }
+
+        /* Responsive */
+        @@media (max-width: 992px) {
+            .sidebar {
+                margin-left: -100%;
+            }
+            .sidebar.active {
+                margin-left: 0;
+            }
+            .content {
+                margin-left: 0;
+            }
+            .content.active {
+                margin-left: var(--sidebar-width);
+            }
+            #sidebarToggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Toggle Button -->
+    <button id="sidebarToggle">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <i class="bi bi-person-circle"></i> Worker Panel
+            </div>
+        </div>
+
+        <ul class="nav flex-column mt-3">
+            <li class="nav-item">
+                <a href="@Url.Action("Dashboard","Worker")" class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "Dashboard" ? "active" : "")">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="@Url.Action("Status","Worker")" class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "Status" ? "active" : "")">
+                    <i class="bi bi-card-checklist"></i> Status
+                </a>
+            </li>
+            <li class="nav-item mt-4">
+                <a href="@Url.Action("Login","Account")" class="nav-link">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="user-avatar">
+                @if (!string.IsNullOrEmpty(User.Identity?.Name))
+                {
+                    @User.Identity.Name.Substring(0,1).ToUpper()
+                }
+            </div>
+            <div>
+                <div class="fw-bold">@User.Identity?.Name</div>
+                <div class="small">Worker Account</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        @RenderBody()
+    </div>
+
+    <!-- jQuery for Sidebar Toggle -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('#sidebarToggle').click(function(){
+                $('.sidebar').toggleClass('active');
+                $('.content').toggleClass('active');
+            });
+        });
+    </script>
+
+    @RenderSection("Scripts", required:false)
+</body>
+</html>

@@ -1,0 +1,424 @@
+@model List<Application.DTOs.OrderAssignmentDTO>
+
+@{
+    Layout = "_WorkerLayout";
+    ViewData["Title"] = "Worker Dashboard";
+
+    // Pre-calculate counts from the Model for use in cards, performance, and chart
+    var totalOrders = Model.Count();
+    var pendingOrders = Model.Count(o => o.Status == "Pending");
+    var inProgressOrders = Model.Count(o => o.Status == "InProgress");
+    var completedOrders = Model.Count(o => o.Status == "Completed");
+    var performanceProgress = totalOrders > 0 ? (completedOrders * 100 / totalOrders) : 0;
+}
+
+<div class="container mt-4">
+    <div class="row mb-4 align-items-center py-4 px-3 rounded shadow-sm header-section">
+    <div class="col-md-8">
+        <h1 class="h2 fw-bold text-white mb-1">Worker Dashboard</h1>
+        <p class="text-light mb-0">Monitor your orders, progress, and upcoming deadlines efficiently.</p>
+    </div>
+</div>
+
+   <div class="row g-4 text-center mb-5">
+
+    <!--  Total Orders -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card shadow-sm border-0 stat-card-light">
+            <div class="card-body p-4">
+                <i class="bi bi-box-seam text-primary fs-2 mb-2"></i>
+                <h6 class="text-uppercase small text-muted mb-1">Total Orders</h6>
+                <h3 class="fw-bold mb-3 text-dark">@totalOrders</h3>
+                <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-primary" role="progressbar" 
+                         style="width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--  Pending -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card shadow-sm border-0 stat-card-light">
+            <div class="card-body p-4">
+                <i class="bi bi-hourglass-split text-warning fs-2 mb-2"></i>
+                <h6 class="text-uppercase small text-muted mb-1">Pending</h6>
+                <h3 class="fw-bold mb-3 text-dark">@pendingOrders</h3>
+                <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-warning" role="progressbar" 
+                         style="width:@(totalOrders > 0 ? (pendingOrders * 100 / totalOrders) : 0)%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--  In Progress -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card shadow-sm border-0 stat-card-light">
+            <div class="card-body p-4">
+                <i class="bi bi-gear-wide-connected text-info fs-2 mb-2"></i>
+                <h6 class="text-uppercase small text-muted mb-1">In Progress</h6>
+                <h3 class="fw-bold mb-3 text-dark">@inProgressOrders</h3>
+                <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-info" role="progressbar" 
+                         style="width:@(totalOrders > 0 ? (inProgressOrders * 100 / totalOrders) : 0)%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--  Completed -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card shadow-sm border-0 stat-card-light">
+            <div class="card-body p-4">
+                <i class="bi bi-check-circle-fill text-success fs-2 mb-2"></i>
+                <h6 class="text-uppercase small text-muted mb-1">Completed</h6>
+                <h3 class="fw-bold mb-3 text-dark">@completedOrders</h3>
+                <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width:@(totalOrders > 0 ? (completedOrders * 100 / totalOrders) : 0)%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+    <div class="row g-4 mt-3">
+    <!--  Performance Summary Card -->
+    <div class="col-lg-4 col-md-6">
+        <div class="card shadow-sm border-0 h-100 rounded-4">
+            <div class="card-header bg-light border-0 d-flex align-items-center">
+                <i class="bi bi-speedometer2 text-success fs-5"></i>
+                <h5 class="mb-0 fw-semibold text-dark">Performance Summary</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-2">You have completed <b>@completedOrders</b> out of <b>@totalOrders</b> orders.</p>
+                <div class="progress mb-3" style="height: 15px;">
+                    <div class="progress-bar bg-success progress-bar-striped progress-bar-animated"
+                         role="progressbar" aria-valuenow="@performanceProgress" aria-valuemin="0" aria-valuemax="100" style="width:@performanceProgress%">
+                        @performanceProgress%
+                    </div>
+                </div>
+                <p class="small text-secondary"><i class="bi bi-lightbulb me-1 text-warning"></i>Keep up the great work!</p>
+            </div>
+        </div>
+    </div>
+
+    <!--  Upcoming Deadlines Card -->
+  <div class="col-lg-4 col-md-6">
+    <div class="card shadow-sm border-0 h-100 rounded-4">
+        <div class="card-header bg-light border-0 d-flex align-items-center">
+            <i class="bi bi-calendar-event text-danger me-2 fs-5"></i>
+            <h5 class="mb-0 fw-semibold text-dark">Upcoming Orders</h5>
+        </div>
+
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                @if (Model != null && Model.Any())
+                {
+                    var today = DateTime.Today;
+                    var upcomingOrders = Model
+                        .Where(o => 
+                            (o.Status?.Equals("InProgress", StringComparison.OrdinalIgnoreCase) == true 
+                             || o.Status?.Equals("Pending", StringComparison.OrdinalIgnoreCase) == true 
+                             || o.Status?.Equals("Assigned", StringComparison.OrdinalIgnoreCase) == true)
+                            && o.DeliveryDate >= today)
+                        .OrderBy(o => o.DeliveryDate)
+                        .Take(5)
+                        .ToList();
+
+                    if (upcomingOrders.Any())
+                    {
+                        foreach (var order in upcomingOrders)
+                        {
+                            var isUrgent = order.DeliveryDate <= today.AddDays(2);
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>
+                                    <i class="bi bi-tag me-2 text-primary"></i>
+                                    Order #@order.OrderId
+                                </span>
+                                <span class="badge bg-light text-dark border @(isUrgent ? "border-danger text-danger fw-bold" : "border-success")">
+                                    <i class="bi bi-clock me-1 @(isUrgent ? "text-danger" : "text-success")"></i>
+                                    @order.DeliveryDate.ToString("dd-MM-yyyy")
+                                </span>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-success">
+                            <i class="bi bi-check2-circle me-1"></i>
+                            Great! No upcoming deadlines.
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        No orders assigned yet.
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- 吝 Chart Overview Card -->
+<div class="col-lg-4 col-md-12">
+    <div class="card shadow-sm border-0 h-100 rounded-4">
+        <div class="card-header  text-white d-flex align-items-center border-0 rounded-top-4">
+            <i class="bi bi-pie-chart-fill me-2 text-primary"></i>
+            <h5 class="mb-0 fw-semibold text-dark">Order Status</h5>
+        </div>
+        <div class="card-body text-center">
+            @if (totalOrders > 0)
+            {
+                <div id="workerStatusChart"></div>
+            }
+            else
+            {
+                <div class="alert alert-info" role="alert">
+                    <i class="bi bi-info-circle-fill me-2"></i>No data available.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- ✅ ApexCharts Script -->
+<script src="~/js/apexcharts.js"></script>
+
+<script>
+    var completedCount = @completedOrders;
+    var inProgressCount = @inProgressOrders;
+    var pendingCount = @pendingOrders;
+    var totalCount = @totalOrders;
+
+    if (totalCount > 0) {
+        var options = {
+            series: [completedCount, inProgressCount, pendingCount],
+            chart: {
+                type: 'pie',
+                width: 300,
+                height: 300
+                
+            },
+            labels: ['Completed', 'In Progress', 'Pending'],
+            colors: ['#ABE7B2', '#6FE6FC', '#FADA7A'],
+
+            //  Hover effect added here
+            states: {
+                hover: {
+                    filter: {
+                        type: 'darken', // or 'darken'
+                        value: 0.15 // adjust intensity (0.1–0.3 looks good)
+                    }
+                },
+                active: {
+                    filter: {
+                        type: 'none' // keeps slice color steady when clicked
+                    }
+                }
+            },
+
+            legend: {
+                position: 'bottom',
+                fontSize: '14px',
+                labels: { colors: '#555' }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function (val, opts) {
+                    return val.toFixed(1) + "%"; // percentage only
+                },
+                style: {
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    colors: ['#000000']
+                },
+                dropShadow: { enabled: false }
+            },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '70%',
+                        labels: {
+                            show: true,
+                            name: {
+                                show: true,
+                                fontSize: '18px',
+                                color: '#333',
+                                offsetY: -10
+                            },
+                            value: {
+                                show: true,
+                                fontSize: '20px',
+                                fontWeight: 'bold',
+                                color: '#000',
+                                formatter: function (val) {
+                                    return val + '%';
+                                }
+                            },
+                            total: {
+                                show: true,
+                                label: 'Total Orders',
+                                fontSize: '18px',
+                                color: '#111',
+                                formatter: function (w) {
+                                    return totalCount;
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            stroke: { show: false },
+            title: {
+                text: "Worker’s Order Summary",
+                align: "center",
+                style: { fontSize: "16px", fontWeight: "bold", color: "#333" }
+            },
+            responsive: [{
+                breakpoint: 480,
+                options: {
+                    chart: { width: 280 },
+                    legend: { position: 'bottom' }
+                }
+            }]
+        };
+
+        var chart = new ApexCharts(document.querySelector("#workerStatusChart"), options);
+        chart.render();
+    }
+</script>
+
+
+<style>
+/*  General Layout */
+/* ===== Worker Dashboard Styles ===== */
+
+body {
+    background-color: #f4f6f8;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+}
+
+/* ===== Header Section ===== */
+.header-section {
+    background: #B13BFF;
+    border-radius: 12px;
+}
+
+
+/* ===== Statistic Cards ===== */
+.stat-card-light {
+    border-radius: 16px;
+    transition: all 0.3s ease-in-out;
+    background: #fff;
+}
+
+.stat-card-light:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card-light i {
+    transition: transform 0.3s ease;
+}
+
+.stat-card-light:hover i {
+    transform: scale(1.2);
+}
+
+/* ===== Progress Bars ===== */
+.progress {
+    background-color: #e9ecef;
+    border-radius: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    transition: width 0.4s ease;
+}
+
+/* ===== Cards (Performance, Deadlines, Chart) ===== */
+.card {
+    border-radius: 18px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    font-weight: 600;
+    font-size: 1rem;
+    background-color: #f9fafb !important;
+    border-radius: 18px 18px 0 0 !important;
+}
+
+/* ===== Upcoming Deadlines List ===== */
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+    padding: 12px 15px;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+.list-group-item i {
+    font-size: 1rem;
+}
+
+/* Urgent badge highlight */
+.badge.text-danger {
+    background-color: rgba(255, 0, 0, 0.08);
+    border-color: #ff4d4f !important;
+}
+
+/* ===== Chart Section ===== */
+#workerStatusChart {
+    margin-top: 10px;
+}
+
+/* ===== Responsive ===== */
+@@media (max-width: 768px) {
+    .header-section {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .stat-card-light {
+        margin-bottom: 15px;
+    }
+}
+
+/* ===== Text and Titles ===== */
+h1, h5 {
+    font-weight: 700;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* ===== General Buttons ===== */
+.btn-primary {
+    background-color: #456882;
+    border: none;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #1b3c73;
+}
+
+</style>

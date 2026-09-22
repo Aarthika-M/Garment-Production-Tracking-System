@@ -1,0 +1,77 @@
+@* @model Application.DTOs.AdminDTO
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+     Layout = "_AdminLayout";
+}
+
+<div class="container mt-5">
+    <h3 class="mb-4 text-primary"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</h3>
+
+    <div class="row g-4 text-center mb-5">
+        <div class="col-md-3 col-sm-6">
+            <div class="card stat-card shadow-sm border-0 bg-gradient-primary text-white">
+                <div class="card-body">
+                    <i class="bi bi-cart-check fs-2 mb-2"></i>
+                    <h6>Total Orders</h6>
+                    <h3>@Model.TotalOrders</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card stat-card shadow-sm border-0 bg-gradient-success text-white">
+                <div class="card-body">
+                    <i class="bi bi-person fs-2 mb-2"></i>
+                    <h6>Total Customers</h6>
+                    <h3>@Model.TotalCustomers</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card stat-card shadow-sm border-0 bg-gradient-warning text-dark">
+                <div class="card-body">
+                    <i class="bi bi-person-gear fs-2 mb-2"></i>
+                    <h6>Total Managers</h6>
+                    <h3>@Model.TotalManagers</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card stat-card shadow-sm border-0 bg-gradient-info text-white">
+                <div class="card-body">
+                    <i class="bi bi-person-badge fs-2 mb-2"></i>
+                    <h6>Total Workers</h6>
+                    <h3>@Model.TotalWorkers</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="chart"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    var options = {
+        series: [@Model.TotalCustomers, @Model.TotalManagers, @Model.TotalWorkers],
+        chart: { type: 'donut', height: 350 },
+        labels: ['Customers', 'Managers', 'Workers'],
+        dataLabels: { enabled: true, dropShadow: { enabled: true } },
+        legend: { position: 'bottom' },
+        plotOptions: { pie: { dataLabels: { offset: -10 } } }
+    };
+    var chart = new ApexCharts(document.querySelector("#chart"), options);
+    chart.render();
+</script>
+
+<style>
+.bg-gradient-primary { background: linear-gradient(45deg, #6a11cb, #2575fc); }
+.bg-gradient-success { background: linear-gradient(45deg, #00b09b, #96c93d); }
+.bg-gradient-warning { background: linear-gradient(45deg, #f9d423, #ff4e50); }
+.bg-gradient-info { background: linear-gradient(45deg, #2193b0, #6dd5ed); }
+.card { border-radius: 15px; transition: 0.3s; }
+.card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+</style> *@

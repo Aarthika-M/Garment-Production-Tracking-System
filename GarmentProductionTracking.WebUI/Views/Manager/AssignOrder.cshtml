@@ -1,0 +1,170 @@
+@model Application.DTOs.OrderAssignmentDTO
+
+@{
+    ViewData["Title"] = "Assign Worker to Order";
+    Layout = "_ManagerLayout";
+}
+
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .assign-card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .assign-card-header {
+        background: #B13BFF;
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        justify-content: space-between;
+    }
+    .assign-card-header:hover{
+         color:#FA812F;
+    }
+
+    .order-info-box {
+        background-color: #f0f8ff;
+        border: 1px solid #cce5ff;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .order-info-box:hover {
+        box-shadow: 0 0 15px rgba(111, 66, 193, 0.15);
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: #343a40;
+    }
+
+    .form-select {
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border: 2px solid #ced4da;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-select:focus {
+        border-color: #6f42c1;
+        box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
+    }
+
+    .btn-success {
+        background-color: #B13BFF;
+        border-color: #28a745;
+        font-weight: 600;
+        padding: 0.6rem 1.5rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.3s ease, transform 0.1s ease;
+    }
+
+    .btn-success:hover {
+        background-color:  #9929EA;
+        color:#FA812F;
+        transform: translateY(-1px);
+    }
+
+    .btn-outline-secondary {
+        background-color:#456882;
+        color:white;
+        font-weight: 600;
+        padding: 0.6rem 1.5rem;
+        border-radius: 0.5rem;
+    }
+     .btn-outline-secondary:hover{
+        background-color: #577B8D;
+         color:#FA812F;
+     }
+</style>
+
+<div class="container py-5">
+    <div class="assign-card shadow-lg">
+        <div class="assign-card-header">
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-people-fill fs-3"></i>
+                <span class="fw-bold fs-4">Workers Assignment Panel</span>
+            </div>
+            
+        </div>
+        <div class="card-body p-5">
+            <div class="order-info-box mb-5">
+                <h5 class="mb-3 text-dark">
+                    <i class="bi bi-file-earmark-text-fill me-2 text-dark"></i> Order Summary
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong><i class="bi bi-person-fill me-1" style="color:#B13BFF;"></i> Order Id:</strong> @Model.OrderId</p>
+                        <p class="mb-1"><strong><i class="bi bi-box-fill me-1 "style="color:#B13BFF;"></i> Quantity:</strong> @Model.Quantity</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong><i class="bi bi-scissors me-1"style="color:#B13BFF;"></i> Garment Type:</strong> @Model.GarmentType</p>
+                        <p class="mb-1"><strong><i class="bi bi-calendar-check-fill me-1 "style="color:#B13BFF;"></i> Delivery Date:</strong> @Model.DeliveryDate.ToString("dd MMM yyyy")</p>
+                    </div>
+                </div>
+                <hr class="my-3">
+                <p class="mb-0 text-break"><strong><i class="bi bi-chat-left-text-fill me-1"style="color:#B13BFF;"></i> Instructions:</strong> @Model.CustomerInstructions</p>
+            </div>
+
+            <form asp-action="AssignOrder" method="post" class="needs-validation" novalidate>
+                <input type="hidden" asp-for="OrderId" />
+
+                <div class="mb-4">
+                    <label asp-for="WorkerId" class="form-label fs-5">
+                        <i class="bi bi-person-badge me-2 "style="color:#B13BFF;"></i> Choose the Best Worker
+                    </label>
+                    <select asp-for="WorkerId" class="form-select form-select-lg" required>
+                        <option value="" disabled selected>-- Select a Skilled Worker --</option>
+                        @if (Model.WorkerList != null)
+                        {
+                            @foreach (var worker in Model.WorkerList)
+                            {
+                                <option value="@worker.Id">@worker.Username</option>
+                            }
+                        }
+                    </select>
+                    <div class="invalid-feedback fw-bold">
+                        A worker must be selected before assigning the order.
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 justify-content-end">
+                    <a asp-action="Dashboard" class="btn btn-outline-secondary btn-lg d-flex align-items-center">
+                        <i class="bi bi-arrow-left me-2"></i> Back to Dashboard
+                    </a>
+                    <button type="submit" class="btn btn-success btn-lg d-flex align-items-center">
+                        <i class="bi bi-lightning-fill me-2"></i> Confirm Assignment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
+}

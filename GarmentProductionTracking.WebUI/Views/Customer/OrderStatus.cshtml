@@ -1,0 +1,270 @@
+@model List<Domain.Entities.GarmentOrder>
+
+@{
+    Layout = "_CustomerLayout";
+    ViewData["Title"] = "My Orders Status";
+
+}
+
+<style>
+/* --- Header Banner --- */
+.header-banner {
+    background: #B13BFF;
+}
+.header-banner:hover {
+    color: orange;
+    cursor:pointer;
+}
+.display-6:hover{
+    color:orange;
+}
+.custom:hover{
+    color:orange;
+}
+
+/* --- Summary Cards --- */
+.summary-card {
+    border: 2.5px solid;
+    border-radius: 1rem;
+    padding: 1.5rem 1.75rem;
+    background: #fff;
+    transition: all 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Text & Icon Styling --- */
+.summary-card h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 0.25rem;
+}
+
+.summary-card p {
+    font-size: 0.95rem;
+    color: #555;
+    margin: 0;
+}
+
+.summary-card i {
+    font-size: 2.2rem !important;
+    opacity: 0.8;
+    transition: transform 0.3s ease;
+}
+.summary-card:hover i {
+    transform: scale(1.15);
+}
+
+/* --- Table Styling --- */
+.table-header {
+   
+    background: #456882;
+    font-weight: 600;
+}
+
+.table-header th {
+    color: #fff;
+}
+.table-header th:hover {
+    color: orange;
+    cursor: pointer;
+}
+.table-row:hover {
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+/* --- Badge Styling --- */
+.badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* --- Progress Bar --- */
+.progress {
+    background-color: #e9ecef;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+/* --- Buttons & Alerts --- */
+.btn-primary {
+    background: linear-gradient(135deg, #B13BFF, #6A11CB);
+    border: none;
+    font-weight: 600;
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, #9929EA, #5710A3);
+    color: #FA812F;
+}
+.alert {
+    background-color: #fdfdfe;
+    border-left: 5px solid #B13BFF;
+}
+.border-primary:hover{
+    background-color:#C2E2FA;
+}
+.border-success:hover{
+      background-color:#AED6CF;
+}
+.border-info:hover{
+     background-color:#A8F1FF;
+}
+.border-warning:hover{
+    background-color:#FFF2C2;
+}
+/* --- Responsive --- */
+@@media (max-width: 768px) {
+    .summary-card {
+        text-align: center;
+        padding: 1.25rem 1rem;
+    }
+    .summary-card i {
+        display: none;
+    }
+}
+</style>
+
+<div class="container-fluid mt-3">
+    <!-- Header Section -->
+    <div class="header-banner shadow-sm p-4 mb-4 rounded-4 text-white">
+        <h2 class="display-6 mb-1 fw-bold"><i class="bi bi-box-seam me-2"></i>Order Status Dashboard</h2>
+        <p class="custom mb-0">Track your garments from stitching to doorstep delivery.</p>
+    </div>
+
+    <!-- Summary Cards -->
+      @if (ViewBag.TotalOrders > 0)
+    {
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="summary-card border-primary shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold">@ViewBag.TotalOrders</h3>
+                            <p class="text-dark large mb-0 ">Total Orders</p>
+                        </div>
+                        <i class="bi bi-cart4 fs-2 text-primary opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="summary-card border-success shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold">@ViewBag.CompletedOrders</h3>
+                            <p class="mb-0">Completed</p>
+                        </div>
+                        <i class="bi bi-check2-all fs-2 text-success opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="summary-card border-info shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold"> @ViewBag.InProgressOrders</h3>
+                            <p class="mb-0">In Progress</p>
+                        </div>
+                        <i class="bi bi-gear fs-2 text-info opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="summary-card border-warning shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold">@ViewBag.PendingOrders</h3>
+                            <p class="mb-0">Pending</p>
+                        </div>
+                        <i class="bi bi-hourglass-split fs-2 text-warning opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- No Orders Message -->
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info shadow-sm rounded-4 text-center py-5">
+            <i class="bi bi-emoji-frown fs-1 mb-3 d-block"></i>
+            <h4 class="fw-bold">No Orders Yet!</h4>
+            <p class="text-muted mb-3">You haven’t placed any orders. Start customizing your garment today!</p>
+            <a href="CreateOrder" class="btn btn-primary rounded-pill px-4"><i class="bi bi-bag-plus me-2"></i>Place New Order</a>
+        </div>
+    }
+    else
+    {
+        <!-- Orders Table -->
+       
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-header text-white">
+                            <tr>
+                                <th class="ps-4 py-3">Order ID</th>
+                                <th class="py-3">Garment Type</th>
+                                <th class="py-3">Quantity</th>
+                                <th class="py-3">Status</th>
+                                <th class="py-3">Order Date</th>
+                                <th class="py-3">Delivery Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                int progressPercent = order.Status switch
+                                {
+                                    "Pending" => 10,
+                                    "In Progress" => 50,
+                                    "Completed" => 100,
+                                    _ => 0
+                                };
+
+                                string badgeClass = order.Status switch
+                                {
+                                    "Completed" => "bg-success text-white",
+                                    "In Progress" => "bg-info text-white",
+                                    "Pending" => "bg-warning text-dark",
+                                    _ => "bg-secondary text-white"
+                                };
+
+                                <tr class="table-row">
+                                    <td class="ps-4 fw-bold text-muted">@order.Id</td>
+                                    <td>@order.GarmentType</td>
+                                    <td>@order.Quantity</td>
+                                    <td>
+                                        <span class="badge rounded-pill @badgeClass px-3 py-2">
+                                            <i class="bi @(order.Status == "Completed" 
+                                                ? "bi-check-circle" 
+                                                : order.Status == "In Progress" 
+                                                    ? "bi-hourglass-split" 
+                                                    : "bi-hourglass") me-1"></i>
+                                            @order.Status
+                                        </span>
+
+                                      
+                                    </td>
+                                    <td>@order.OrderDate.ToString("dd MMM yyyy")</td>
+                                    <td >@order.DeliveryDate.ToString("dd MMM yyyy")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

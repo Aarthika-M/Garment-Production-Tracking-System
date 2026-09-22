@@ -1,0 +1,152 @@
+@model List<Application.DTOs.OrderAssignmentDTO>
+@{
+    ViewData["Title"] = "Update Order Status";
+    Layout = "_ManagerLayout";
+}
+
+<div class="container fluid mt-4">
+    <!-- Header -->
+    <div class="text-white rounded-4 shadow-sm p-4 mb-4 order-header">
+        <h3 class="mb-2 d-flex align-items-center gap-2">
+            <i class="bi bi-pencil-square"></i> Update Order Status
+        </h3>
+        <p class="mb-0">Manage your garment orders and update their progress seamlessly.</p>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-custom">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Garment Type</th>
+                            <th>Quantity</th>
+                            <th>Worker</th>
+                            <th>Current Status</th>
+                            <th>Update Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td>#@order.OrderId</td>
+                                <td>@order.CustomerName</td>
+                                <td>@order.GarmentType</td>
+                                <td>@order.Quantity</td>
+                                <td>@order.WorkerName</td>
+                                <td>
+                                    <span class="badge 
+                                        @(order.Status == "Completed" ? "bg-success" :
+                                          order.Status == "InProgress" ? "bg-info text-dark" :
+                                          order.Status == "Pending" ? "bg-warning text-dark" : "bg-secondary")">
+                                        @order.Status
+                                    </span>
+                                </td>
+                                <td>
+                                    <form asp-action="UpdateOrderStatus" method="post" class="d-flex align-items-center gap-2">
+                                        <input type="hidden" name="orderId" value="@order.OrderId" />
+                                        <select name="status" class="form-select form-select-sm w-auto">
+                                         <option value="Pending" selected="@("Pending" == order.Status)">Pending</option>
+                                            <option value="InProgress" selected="@("InProgress" == order.Status)">In Progress</option>
+                                            <option value="Completed" selected="@("Completed" == order.Status)">Completed</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-custom">
+                                            <i class="bi bi-check2-circle me-1"></i> Update
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+body{
+    font-family: 'Poppins', sans-serif;
+}
+/* Header */
+.order-header {
+    background-color: #B13BFF; /* Purple */
+    transition: background-color 0.3s ease;
+}
+.order-header:hover {
+   color: #FF7F50; /* Orange on hover */
+}
+
+/* Card & Table */
+.card {
+    border: none;
+    border-radius: 1rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+.table-custom  {
+    background-color:  #456882;
+    color: #fff;
+}
+.table-custom :hover {
+
+    color: orange;
+}
+
+/* Badge Styling */
+.badge {
+    font-size: 0.85rem;
+    padding: 0.45em 0.75em;
+    font-weight: 600;
+}
+
+/* Form select & button */
+.form-select-sm {
+    min-width: 120px;
+}
+
+.btn-primary {
+    display: flex;
+    align-items: center;
+}
+.btn-custom {
+        background:#B13BFF;
+        color:white;
+}
+
+.btn-custom:hover {
+        background: #9929EA;
+        box-shadow: 0 8px 20px rgba(106, 17, 203, 0.25);
+        transform: translateY(-2px);
+        color:#FA812F;
+}
+
+
+/* Subtle animation on hover */
+.status-badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+/* Optional: responsive tweak */
+@@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+}
+
+</style>

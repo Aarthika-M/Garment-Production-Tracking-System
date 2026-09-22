@@ -1,0 +1,173 @@
+@{
+    Layout = "_ManagerLayout";
+
+    var selectedRole = (string)ViewBag.Role;
+    var controllers = (Dictionary<string, List<string>>)ViewBag.Controllers;
+    var existingPermissions = (List<Domain.Entities.RolePermission>)ViewBag.Permissions;
+}
+
+
+<div class="mb-4">
+        <h2 class="heading-hover text-white p-3 rounded" >
+            <i class="bi bi-shield-lock"></i> Access Control
+        </h2>
+</div>
+
+
+<!-- Role Dropdown -->
+<select id="roleSelect" class="form-select w-25 mb-4">
+    <option value="Customer" selected="@(selectedRole == "Customer")">Customer</option>
+    <option value="Manager" selected="@(selectedRole == "Manager")">Manager</option>
+    <option value="Worker" selected="@(selectedRole == "Worker")">Worker</option>
+</select>
+
+<!-- Begin Table UI for Each Controller -->
+@foreach (var ctrl in controllers)
+{
+    <div class="card shadow-sm  mb-3 ">
+        <div class="card-header text-white" style="background-color: #456882;">
+            <strong>@ctrl.Key Controller</strong>
+        </div>
+
+        <div class="card-body p-2">
+            <table class="table table-bordered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:60%">Action</th>
+                        <th style="width:40%" class="text-center">Permission</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var act in ctrl.Value)
+                    {
+                        var isChecked = existingPermissions.Any(p =>
+                            p.Controller == ctrl.Key &&
+                            p.Action == act &&
+                            p.Enabled);
+
+                        <tr>
+                            <td class="align-middle">@act</td>
+                            <td class="text-center align-middle">
+                                <label class="switch">
+                                    <input type="checkbox"
+                                           class="permToggle"
+                                           data-controller="@ctrl.Key"
+                                           data-action="@act"
+                                           @(isChecked ? "checked" : "") />
+
+                                    <span class="slider round"></span>
+                                </label>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+}
+
+<div class="text-end mt-3">
+    <button id="saveBtn" class="btn btn-success">Save Permisssion</button>
+</div>
+
+
+@section Scripts {
+<script>
+    
+    $("#roleSelect").change(function () {
+        let role = $(this).val();
+        window.location.href = "/AccessControl/Index?role=" + role;
+    });
+
+    // Save all permissions
+    $("#saveBtn").click(function () {
+
+        let role = $("#roleSelect").val();
+        let list = [];
+
+        $(".permToggle").each(function () {
+            list.push({
+                Role: role,
+                Controller: $(this).data("controller"),
+                Action: $(this).data("action"),
+                Enabled: $(this).is(":checked")
+            });
+        });
+
+        fetch("/AccessControl/SaveAllPermissions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(list)//js object is convert into json
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+        })
+        .catch(err => alert("Error saving permissions"));
+    });
+</script>
+}
+
+<style>
+
+/* Switch Styling */
+.heading-hover {
+    background: #B13BFF;
+    transition: background 0.3s ease;
+}
+
+.heading-hover:hover {
+    color: #FA812F; 
+    cursor: pointer; 
+}
+.switch {
+    position: relative;
+    width: 50px;
+    height: 24px;
+    display: inline-block;
+}
+
+.switch input { 
+    opacity: 0; 
+    width: 0; 
+    height: 0; 
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0;
+    background: #dee2e6;
+    transition: .3s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px; 
+    width: 18px;
+    left: 3px; 
+    bottom: 3px;
+    background: white; 
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { 
+    background: #023be7; 
+}
+
+input:checked + .slider:before { 
+    transform: translateX(26px); 
+}
+
+.table th, .table td {
+    vertical-align: middle;
+}
+</style>

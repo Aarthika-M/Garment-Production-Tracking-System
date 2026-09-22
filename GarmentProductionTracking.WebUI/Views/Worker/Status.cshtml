@@ -1,0 +1,314 @@
+@model List<Application.DTOs.OrderAssignmentDTO>
+
+@{
+    Layout = "_WorkerLayout";
+    ViewData["Title"] = "Status";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worker Dashboard</title>
+   
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --warning: #ffbe0b;
+            --info: #4895ef;
+            --danger: #f72585;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            font-family: 'Poppins', sans-serif;
+    }
+
+    .dashboard-header {
+        background: #B13BFF; /* Gradient background */
+        color: white;
+        border-radius: 16px; /* Slightly larger border-radius */
+        padding: 1.5rem;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); /* Stronger, softer shadow */
+        margin-bottom: 2rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .dashboard-header:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+        color:#FA812F;
+    }
+
+    .dashboard-header h2 {
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        
+    }
+
+    .dashboard-header p {
+        font-weight: 400;
+        opacity: 0.9;
+        
+    }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .card-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .table-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        
+        .table thead {
+            background-color: #456882;
+            color: white;
+        }
+        
+        .table th {
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+        }
+        .table th:hover{
+             color:#FA812F;
+        }
+        
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-color: #f1f3f9;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.5em 0.75em;
+            font-weight: 600;
+        }
+        
+        .order-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #e9ecef;
+            transition: transform 0.3s ease;
+        }
+        
+        .order-image:hover {
+            transform: scale(1.8);
+            z-index: 10;
+            position: relative;
+        }
+        
+        .btn-action {
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .instructions-cell {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .instructions-cell:hover {
+            white-space: normal;
+            overflow: visible;
+            position: relative;
+            z-index: 5;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .status-badge {
+            padding: 0.5rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .stats-card {
+            text-align: center;
+            padding: 1.5rem;
+        }
+        
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+        .btn-custom {
+    background-color: #B13BFF;  /* Normal background */
+    color: white;              /* Text color */
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-custom:hover {
+    background-color:#9929EA; /* Hover background */
+    color: #FA812F;             /* Optional: change text color on hover */
+}
+
+        @@media (max-width: 768px) {
+            .table-container {
+                overflow-x: auto;
+            }
+            
+            .table {
+                min-width: 800px;
+            }
+            
+            .dashboard-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Dashboard Header -->
+    
+
+    <div class="container mb-5">
+     <div class="dashboard-header d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-0"><i class="bi bi-clipboard-check me-2"></i>My Assigned Orders</h2>
+            <p class="mb-0 mt-1 opacity-75">Manage and update your assigned orders.</p>
+        </div>
+      
+    </div>
+       
+        <!-- Orders Table -->
+      
+  
+@if (Model == null || !Model.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-inbox fs-1 mb-3"></i>
+        <h5>No orders assigned yet!</h5>
+        <p>All current orders are assigned or completed.</p>
+    </div>
+}
+else
+{
+    <table class="table table-hover table-striped align-middle shadow-sm rounded-3">
+        <thead class="">
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Garment</th>
+                <th>Quantity</th>
+                <th>Delivery Date</th>
+                <th>Status</th>
+                <th>Image</th>
+                <th>Instructions</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model.DistinctBy(o => o.OrderId))  @* Remove duplicates *@
+            {
+                <tr>
+                    <td>@order.OrderId</td>
+                    <td>@order.CustomerName</td>
+                    <td>@order.GarmentType</td>
+                    <td>@order.Quantity</td>
+                    <td>@order.DeliveryDate.ToString("dd MMM yyyy")</td>
+                   <td>
+                                 <span class="badge 
+                                        @(order.Status == "Completed" ? "bg-success" :
+                                          order.Status == "InProgress" ? "bg-info text-dark" :
+                                          order.Status == "Pending" ? "bg-warning text-dark" : "bg-secondary")">
+                                        @order.Status
+                                    </span>
+                            </td>
+                    <td>
+                        @if (order.ImageContent != null && order.ImageContent.Length > 0)
+                        {
+                            <img src="data:image/png;base64,@Convert.ToBase64String(order.ImageContent)" 
+                                 alt="Order Image" width="60" height="60" style="border-radius:5px; object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <span class="text-muted">No image</span>
+                        }
+                    </td>
+                    <td title="@order.CustomerInstructions">
+                        @(!string.IsNullOrEmpty(order.CustomerInstructions) ? order.CustomerInstructions : "No instructions")
+                    </td>
+                    <td>
+                        <a asp-action="UpdateStatus"
+   asp-controller="Worker"
+   asp-route-assignmentId="@order.Id"
+   class="btn btn-sm btn-primary btn-custom">
+    <i class="bi bi-pencil-square me-1"></i> Update Status
+</a>
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+        
+        
+    <script>
+        // Example of showing the modal when update button is clicked
+        document.querySelectorAll('.btn-action').forEach(button => {
+            button.addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
+                modal.show();
+            });
+        });
+        
+        // Example of image preview on hover
+        document.querySelectorAll('.order-image').forEach(img => {
+            img.addEventListener('mouseenter', function() {
+                this.style.zIndex = '10';
+                this.style.position = 'relative';
+            });
+            
+            img.addEventListener('mouseleave', function() {
+                this.style.zIndex = '1';
+            });
+        });
+    </script>
+</body>
+</html>

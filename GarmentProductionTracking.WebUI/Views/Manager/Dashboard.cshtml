@@ -1,0 +1,328 @@
+@model List<Application.DTOs.OrderAssignmentDTO>
+
+@{
+    Layout = "_ManagerLayout";
+    ViewData["Title"] = "Manager Dashboard";
+}
+
+<style>
+    /* Global Styles & Typography */
+    body {
+        background-color: #f0f4f8; /* Lighter, subtle background */
+        font-family: 'Poppins', sans-serif;
+    }
+
+    /* Dashboard Header - Modern Look */
+    .dashboard-header {
+        background: #B13BFF; /* Gradient background */
+        color: white;
+        border-radius: 16px; /* Slightly larger border-radius */
+        padding: 2rem;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); /* Stronger, softer shadow */
+        margin-bottom: 2rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .dashboard-header:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+        color:#FA812F;
+    }
+
+    .dashboard-header h2 {
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        
+    }
+
+    .dashboard-header p {
+        font-weight: 400;
+        opacity: 0.9;
+        
+    }
+
+    /* Order Card Styling */
+    .order-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        border: 1px solid #e9ecef;
+       /* Subtle border */
+    }
+
+    .order-card:hover {
+        transform: translateY(-8px); /* More pronounced lift */
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    }
+
+    .order-card-header {
+        background: #f8f9fa; /* Light header background */
+        border-bottom: 1px solid #e9ecef;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .order-id {
+        font-weight: 700;
+        color: #6c5ce7; /* Primary brand color */
+        font-size: 1.1rem;
+    }
+
+    /* Status Badges - Using a more modern pill shape */
+    .status-badge {
+        border-radius: 50px;
+        padding: 0.3rem 0.9rem;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Updated color palette for statuses */
+    .status-pending { background: rgba(255, 193, 7, 0.2); color: #ffc107; } /* Yellow/Orange */
+    .status-assigned {  background: rgba(33, 150, 243, 0.2); color: #0ABAB5;  } /* Purple/Primary */
+    .status-completed {  background: rgba(0, 200, 83, 0.2); color: #00c853; } /* Green/Success */ 
+   .status-inprogress {
+    background: rgba(0, 123, 255, 0.2); /* Soft blue */
+    color: #007bff; /* Vibrant blue */
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-weight: 600;
+}
+
+    .order-card-body { padding: 1.5rem; }
+
+    
+
+
+    /* Order Detail Styling */
+    .order-detail {
+        margin-bottom: 1.25rem;
+        align-items: flex-start; /* Align details to the top */
+    }
+
+    .order-detail-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%; /* Circle icons for elegance */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.2rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        flex-shrink: 0; /* Prevent icon from shrinking */
+    }
+
+    /* Icon color themes */
+    .icon-primary { background-color: rgba(108, 92, 231, 0.1); color: #6c5ce7; }
+    .icon-info { background-color: rgba(23, 162, 184, 0.1); color: #17a2b8; }
+    .icon-warning { background-color: rgba(255, 193, 7, 0.1); color: #ffc107; }
+    .icon-secondary { background-color: rgba(108, 117, 125, 0.1); color: #6c757d; }
+    .icon-success { background-color: rgba(25, 135, 84, 0.1); color: #198754; }
+    .icon-dark { background-color: rgba(52, 58, 64, 0.1); color: #343a40; }
+
+    .order-detail .fw-semibold {
+        font-size: 1rem;
+        color: #343a40;
+    }
+
+    .order-detail small {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+
+    /* Action Buttons */
+    .order-actions .btn {
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    .custom-btn {
+    background-color: #B13BFF;
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.custom-btn:hover {
+    background-color: #9929EA;/* hover orange */
+    color: #FA812F;
+}
+    
+    .empty-message {
+        text-align: center;
+        background: white;
+        border-radius: 16px;
+        padding: 4rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        color: #6c757d;
+        border: 1px solid #e9ecef;
+    }
+</style>
+
+<div class="container fluid mt-4">
+
+    <div class="dashboard-header d-flex justify-content-between align-items-center pt-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-speedometer2 me-2"></i>Garment Production Management</h2>
+            <p class="mb-0">Track and manage customer orders and worker assignments.</p>
+        </div>
+        <div class="d-none d-sm-block">
+            <i class="bi bi-gear-fill fs-1 opacity-75"></i>
+        </div>
+    </div>
+
+    <div class="row mb-4 g-3">
+
+     <div class="col-md-4">
+            <div class="p-3 bg-white shadow-sm rounded-3 text-center border">
+                <i class="bi bi-bar-chart-fill text-success me-2"></i>
+                <small class="text-muted text-uppercase fw-bold">Total Orders: @(Model == null ? 0 : Model.Count)</small>
+            </div>
+        </div>  
+
+        <div class="col-md-4">
+    <div class="p-3 bg-white shadow-sm rounded-3 text-center border">
+        <i class="bi bi-check-circle-fill text-success me-2"></i>
+        <small class="text-muted text-uppercase fw-bold">
+            Completed: @(Model == null ? 0 : Model.Count(o => o.Status == "Completed"))
+        </small>
+    </div>
+</div>
+
+        <div class="col-md-4">
+            <div class="p-3 bg-white shadow-sm rounded-3 text-center border">
+                <i class="bi bi-hourglass-split text-warning me-2"></i>
+                <small class="text-muted text-uppercase fw-bold">Pending: @(Model == null ? 0 : Model.Count(o => o.Status != "Completed"))</small>
+            </div>
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="empty-message">
+            <i class="bi bi-bag-x-fill fs-1 mb-3"></i>
+            <h5 class="mb-2 fw-bold">No New Orders to Manage!</h5>
+            <p class="text-muted">All current orders are assigned or completed. Well done!</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var order in Model)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="order-card h-100">
+                        <div class="order-card-header">
+                            <span class="order-id"><i class="bi bi-tag-fill me-1"></i> @order.OrderId</span>
+                            @{
+                                var statusClass = order.Status switch
+                                {
+                                    "Completed" => "status-completed",
+                                    "Assigned" => "status-assigned",
+                                     "In Progress" => "status-inprogress",
+                                    _ => "status-pending"
+                                };
+                            }
+                            <span class="status-badge @statusClass">@order.Status</span>
+                        </div>
+
+                        <div class="order-card-body">
+                            
+                            <div class="order-detail d-flex">
+                                <div class="order-detail-icon icon-primary"><i class="bi bi-person-circle"></i></div>
+                                <div class="ms-2">
+                                    <div class="fw-semibold">@order.CustomerName</div>
+                                    <small class="text-muted">Customer Name</small>
+                                </div>
+                            </div>
+
+                            <div class="order-detail d-flex">
+                                <div class="order-detail-icon icon-info"><i class="bi bi-scissors"></i></div>
+                                <div class="ms-2">
+                                    <div class="fw-semibold">@order.GarmentType</div>
+                                    <small class="text-muted">Garment Type</small>
+                                </div>
+                            </div>
+
+                            <div class="order-detail d-flex">
+                                <div class="order-detail-icon icon-warning"><i class="bi bi-chat-dots-fill"></i></div>
+                                <div class="ms-2">
+                                    <div class="fw-semibold text-truncate" style="max-width: 200px;" title="@order.CustomerInstructions">@order.CustomerInstructions</div>
+                                    <small class="text-muted">Instructions (Hover to read)</small>
+                                </div>
+                            </div>
+
+                            <div class="order-detail d-flex">
+                                <div class="order-detail-icon icon-secondary"><i class="bi bi-box2-fill"></i></div>
+                                <div class="ms-2">
+                                    <div class="fw-semibold">@order.Quantity</div>
+                                    <small class="text-muted">Quantity</small>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="order-detail d-flex mb-0">
+                                        <div class="order-detail-icon icon-success" style="width: 35px; height: 35px; font-size: 1rem;"><i class="bi bi-calendar-plus"></i></div>
+                                        <div class="ms-2">
+                                            <div class="fw-semibold" style="font-size: 0.9rem;">@order.OrderDate.ToString("dd MMM")</div>
+                                            <small class="text-muted">Order Date</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="order-detail d-flex mb-0">
+                                        <div class="order-detail-icon icon-success" style="width: 35px; height: 35px; font-size: 1rem;"><i class="bi bi-truck"></i></div>
+                                        <div class="ms-2">
+                                            <div class="fw-semibold" style="font-size: 0.9rem;">@order.DeliveryDate.ToString("dd MMM")</div>
+                                            <small class="text-muted">Delivery Date</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <hr class="my-3"/>
+
+                            <div class="order-detail d-flex mb-3">
+                                <div class="order-detail-icon icon-dark"><i class="bi bi-person-check-fill"></i></div>
+                                <div class="ms-2">
+                                    <div class="fw-semibold">@order.WorkerName</div>
+                                    <small class="text-muted">Assigned Worker</small>
+                                </div>
+ 
+
+
+                            </div>
+
+                            <div class="order-actions d-flex gap-2">
+                                @if (order.Status == "Not Assigned")
+                                {
+                                    <a asp-action="AssignOrder" asp-route-orderId="@order.OrderId" class="btn btn-info btn-sm d-flex align-items-center gap-1 flex-grow-1">
+                                        <i class="bi bi-person-plus-fill"></i> Assign Worker
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="#" class="btn btn-outline-dark btn-sm d-flex align-items-center gap-1 flex-grow-1 disabled" title="Order is already assigned">
+                                        <i class="bi bi-check-circle-fill"></i> Assigned
+                                    </a>
+                                }
+                                <a asp-action="OrderDetails" asp-route-orderId="@order.OrderId" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 custom-btn ">
+                                    <i class="bi bi-box-arrow-up-right"></i> Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

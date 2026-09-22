@@ -1,0 +1,358 @@
+@model Application.DTOs.OrderAssignmentDTO
+@{
+    Layout = "_WorkerLayout";
+    ViewData["Title"] = "Update Status";
+}
+
+<style>
+:root {
+    --primary: #4361ee;
+    --primary-dark: #3a56d4;
+    --secondary: #6c757d;
+    --success: #4cc9a7;
+    --warning: #f9c74f;
+    --info: #4895ef;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s ease;
+}
+
+body {
+    background: linear-gradient(135deg, #f5f7fb 0%, #eef2f7 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--dark);
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.status-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+    border: none;
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.status-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    background:  #B13BFF;
+    color: white;
+    padding: 1.5rem;
+    border-radius: 16px 16px 0 0;
+    border-bottom: none;
+}
+
+.card-header:hover{
+    color:#FA812F;
+}
+
+.form-control, .form-select {
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #e1e5eb;
+    transition: var(--transition);
+    font-size: 1rem;
+}
+
+.btn {
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border: none;
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(67, 97, 238, 0.4);
+}
+
+.btn-outline-secondary {
+    border: 1.5px solid #6c757d;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: white;
+}
+
+.status-options {
+    display: flex;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.status-option {
+    flex: 1;
+    border: 2px solid #e1e5eb;
+    border-radius: 12px;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+}
+
+.status-option:hover {
+    border-color: #6a11cb;
+    background-color: rgba(67, 97, 238, 0.03);
+}
+
+.status-option.selected {
+    border-color: #6a11cb;
+    background-color: rgba(67, 97, 238, 0.08);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.1);
+}
+
+.status-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+}
+
+.icon-pending {
+    background: linear-gradient(135deg, #f9c74f, #f8961e);
+    color: white;
+}
+
+.icon-inprogress {
+    background: linear-gradient(135deg, #4895ef, #4361ee);
+    color: white;
+}
+
+.icon-completed {
+    background: linear-gradient(135deg, #4cc9a7, #38b2ac);
+    color: white;
+}
+
+.progress-container {
+    margin: 1.5rem 0;
+    background: #f1f3f9;
+    border-radius: 10px;
+    padding: 1.5rem;
+}
+
+.progress {
+    height: 10px;
+    border-radius: 5px;
+    background-color: #e9ecef;
+    overflow: hidden;
+}
+
+.progress-bar {
+    border-radius: 5px;
+    transition: width 0.8s ease;
+}
+
+.order-details {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: var(--secondary);
+    font-weight: 500;
+}
+
+.detail-value {
+    font-weight: 600;
+    color: var(--dark);
+}
+   .btn-cancel {
+        background-color:#456882;
+        color:#fff ;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-cancel:hover {
+        background-color: #577B8D;
+        color: #FA812F;
+    }
+
+    /* Update Status button (Purple) */
+    .btn-update {
+        background-color:#B13BFF; /* Bootstrap purple shade */
+        color: #fff;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-update:hover {
+        background-color: #9929EA;
+        color: #FA812F;
+    }
+
+    /* Optional: for button spacing consistency */
+    .btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+@@media (max-width: 768px) {
+    .status-options {
+        flex-direction: column;
+    }
+    
+    body {
+        padding: 1rem 0;
+    }
+}
+</style>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <div class="status-card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="h4 mb-1"><i class="bi bi-pencil-square me-2"></i>Update Order Status</h2>
+                        <p class="mb-0 opacity-75">Track and update the progress of customer orders</p>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <form asp-action="UpdateStatus" method="post" id="statusForm">
+                        <input type="hidden" name="assignmentId" value="@Model.Id" />
+
+                        <!-- Order Information -->
+                        <div class="order-details">
+                            <h5 class="mb-3">Order Information</h5>
+                            <div class="detail-item">
+                                <span class="detail-label">Order ID</span>
+                                <span class="detail-value">#@Model.OrderId</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Customer</span>
+                                <span class="detail-value">@Model.CustomerName</span>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="progress-container">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="fw-semibold">Order Progress</span>
+                                <span class="progress-text text-primary fw-bold">33% Complete</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: 33%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Status Selection -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Update Status</label>
+                            <div class="status-options">
+                                <div class="status-option" data-status="Pending">
+                                    <div class="status-icon icon-pending"><i class="bi bi-clock"></i></div>
+                                    <h6 class="mb-1">Pending</h6>
+                                </div>
+                                
+                                <div class="status-option selected" data-status="InProgress">
+                                    <div class="status-icon icon-inprogress"><i class="bi bi-gear"></i></div>
+                                    <h6 class="mb-1">In Progress</h6>
+                                </div>
+                                
+                                <div class="status-option" data-status="Completed">
+                                    <div class="status-icon icon-completed">
+                                     <i class="bi bi-check-circle text-white "></i></div>
+                                    <h6 class="mb-1">Completed</h6>
+                                </div>
+                            </div>
+
+                            <!-- Hidden select for form submission -->
+                            <select name="Status" class="form-select d-none" required>
+                                <option value="Pending">Pending</option>
+                                <option value="InProgress" selected>In Progress</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            <label for="notes" class="form-label fw-semibold">Additional Notes</label>
+                            <textarea name="notes" class="form-control" id="notes" rows="4" placeholder="Add any remarks about this order..."></textarea>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-end gap-3 mt-4">
+                            <a asp-action="Status" class="btn btn-cancel">
+    <i class="bi bi-x-circle me-2"></i> Cancel
+</a>
+<button type="submit" class="btn btn-update">
+    <i class="bi bi-check-circle me-2"></i> Update Status
+</button>
+                       </div>
+                       </form>
+                       @section Scripts {
+    <script>
+        // Get all status options and hidden select
+        const statusOptions = document.querySelectorAll('.status-option');
+        const hiddenSelect = document.querySelector('select[name="Status"]');
+
+        statusOptions.forEach(option => {
+            option.addEventListener('click', function () {
+                // Remove 'selected' class from all options
+                statusOptions.forEach(o => o.classList.remove('selected'));
+
+                // Add 'selected' class to clicked option
+                this.classList.add('selected');
+
+                // Update hidden select value
+                hiddenSelect.value = this.dataset.status;
+
+                // Optional: update progress bar color/width if needed
+                const progressBar = document.querySelector('.progress-bar');
+                const progressText = document.querySelector('.progress-text');
+                switch(this.dataset.status){
+                    case "Pending":
+                        progressBar.className = "progress-bar bg-warning";
+                        progressBar.style.width = "33%";
+                        progressText.textContent = "33% Complete";
+                        break;
+                    case "InProgress":
+                        progressBar.className = "progress-bar bg-info";
+                        progressBar.style.width = "66%";
+                        progressText.textContent = "66% Complete";
+                        break;
+                    case "Completed":
+                        progressBar.className = "progress-bar bg-success";
+                        progressBar.style.width = "100%";
+                        progressText.textContent = "100% Complete";
+                        break;
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,57 @@
+﻿@* Views/Shared/_Layout.cshtml *@
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+    var role = HttpContextAccessor.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "Guest";
+    // Get current controller and action
+    var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+
+    // Hide sidebar on Login and Register pages
+    bool showSidebar = !(currentController == "Account" && 
+                        (currentAction == "Login" || currentAction == "Register"|| currentAction == "AccessDenied"));
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - GarmentProductionTracking</title>
+
+    <!-- Bootstrap & Icons -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+</head>
+<body>
+    <div class="d-flex">
+
+        @* Sidebar *@
+        @if (!(ViewData["HideSidebar"] != null && (bool)ViewData["HideSidebar"]))
+        @if (showSidebar)
+        {
+            <div class="sidebar bg-dark text-white d-flex flex-column p-3 shadow" style="width:250px; min-height:100vh;">
+                <h4 class="text-center mb-4 fw-bold">
+                    <i class="bi bi-speedometer2 me-2"></i> @User.Identity.Name
+                </h4>
+                
+            </div>
+        }
+
+        @* Main content area *@
+        <div class="flex-grow-1">
+            <div class="container-fluid py-4">
+                <main role="main">
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
